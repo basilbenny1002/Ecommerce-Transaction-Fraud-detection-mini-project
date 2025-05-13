@@ -1,3 +1,5 @@
 onlinefraud.csv
 model.pkl
 X_test.txt
+.streamlit/config.toml
+test.py

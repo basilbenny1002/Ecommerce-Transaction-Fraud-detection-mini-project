@@ -22,7 +22,7 @@ print(type(X_test))
 with open('X_test.txt', 'w') as f:
     f.write(df.head().to_string())
 
-raise NotImplementedError
+# raise NotImplementedError
 # Initialize XGBoost classifier
 xgb_model = xgb.XGBClassifier(objective='binary:logistic',  # For binary classification
                              use_label_encoder=False, # Suppress the warning about deprecated parameter
