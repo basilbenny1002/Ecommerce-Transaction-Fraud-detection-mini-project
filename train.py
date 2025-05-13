@@ -18,8 +18,11 @@ y = df['isFraud']
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+print(type(X_test))
+with open('X_test.txt', 'w') as f:
+    f.write(df.head().to_string())
 
-
+raise NotImplementedError
 # Initialize XGBoost classifier
 xgb_model = xgb.XGBClassifier(objective='binary:logistic',  # For binary classification
                              use_label_encoder=False, # Suppress the warning about deprecated parameter

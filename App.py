@@ -33,6 +33,7 @@ class App:
     def __init__(self):
         self.page = None
         self.txt_number = ft.TextField(value="0", text_align=ft.TextAlign.RIGHT, width=100)
+        
 
     def main(self, page: ft.Page):
         self.page = page
