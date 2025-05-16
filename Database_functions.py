@@ -60,7 +60,7 @@ def get_user_data(provided_password: str, user_id: str = None, mail: str = None)
         return JSONResponse(status_code=200, content={"Status_code": 200, "Message": "Success", "UserID": id,"Name": name, "API_KEY": api_key})
 
 
-def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  oldbalanceDest,  newbalanceDest,  isFraud,  isFlaggedFraud,  type_CASH_OUT,  type_DEBIT,  type_PAYMENT,  type_TRANSFER, user_mail):
+def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  oldbalanceDest,  newbalanceDest,  isFraud,  isFlaggedFraud, user_mail):
     try:
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
@@ -80,12 +80,13 @@ def get_transaction_details(user_id: str):
         cursor.execute(f"SELECT * FROM TRANSACTIONS WHERE user_id = '{user_id}'")
     except Exception as e:
         print(f"An error occurred {e}")
-        return
+        return JSONResponse(status_code=500, content={"Status_code": 500, "Message": "Failed {e}"})
     else:
         data = cursor.fetchall()
         if not data:
-            return "User not found" 
-        return {i: list(data[i]) for i in range(data)}
+            return JSONResponse(status_code=404, content={"Status_code": 404, "Message": "User not found"}) 
+        return JSONResponse(status_code=200, content={"Status_code": 200, "Message":"Success", "Content":{i: list(data[i]) for i in range(data)}})
+        
 
 
 

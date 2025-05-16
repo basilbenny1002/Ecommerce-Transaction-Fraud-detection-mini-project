@@ -3,7 +3,7 @@ import numpy as np
 import cupy as cp
 
 DEVICE = 'cuda'  # or 'cpu'
-def predict(data: list):
+def predict_fraud(data: list):
     with open("model.pkl", "rb") as file:
         loaded_model = pickle.load(file)
 
@@ -17,6 +17,8 @@ def predict(data: list):
         predictions = loaded_model.predict(input_data)
 
     return predictions[0]
+
+
 if __name__ == '__main__':
     data = [181.00, 181.0, 0.00, 0.0, 0.0, 0, False, False, False, True]
-    print(predict(data))
+    print(predict_fraud (data))
