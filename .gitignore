@@ -3,3 +3,4 @@ model.pkl
 X_test.txt
 .streamlit/config.toml
 test.py
+__pycache__/

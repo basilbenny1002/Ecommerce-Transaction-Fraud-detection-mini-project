@@ -26,7 +26,7 @@ with open('X_test.txt', 'w') as f:
 # Initialize XGBoost classifier
 xgb_model = xgb.XGBClassifier(objective='binary:logistic',  # For binary classification
                              use_label_encoder=False, # Suppress the warning about deprecated parameter
-                             eval_metric='logloss', tree_method='gpu_hist',  enable_categorical=True)  # Specify evaluation metric for binary classification
+                             eval_metric='logloss', tree_method='hist',  enable_categorical=True,device='cuda' )  # Specify evaluation metric for binary classification
 
 # Train the model
 xgb_model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
