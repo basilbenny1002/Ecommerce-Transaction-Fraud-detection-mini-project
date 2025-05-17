@@ -7,6 +7,7 @@ from predict import predict_fraud
 
 
 
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"],
@@ -25,14 +26,17 @@ class Transaction(BaseModel):
     user_id: str
     type: str
     amount: float
-    nameOrig: str
+    # nameOrig: str
     oldbalanceOrg: float
     newbalanceOrig: float
-    nameDest: str
+    # nameDest: str
     oldbalanceDest: float
     newbalanceDest: float
     isFlaggedFraud: float
     mail: str
+class User(BaseModel):
+    email: str   
+    password: str
 
 
 
@@ -42,17 +46,22 @@ def signup(User: newUser):
     print(User)
     print(type(User))
     print(User.name)    
-    return add_new_user(User.email, User.password, User.user_id)
+    return add_new_user(User.email, User.password, User.user_id, User.name)
 
 
-@app.get("signin")
-def login(password: str,user_id: Union[str, None] = Query(default=None), email: Union[str, None] = Query(default=None)):
-    return get_user_data(password, user_id, email)
+@app.post("/signin/")
+def login(User: User):
+    print(User)
+    print(type(User))
+    print(User.email)
+    print(User.password)
+    return get_user_data(User.password,User.email)
 
-@app.post("/add_transaction_details")
+
+@app.post("/predict")
 def add_transaction(data: Transaction):
     return add_transaction_details(Transaction.user_id, Transaction.amount, Transaction.oldbalanceOrg, Transaction.newbalanceOrig, Transaction.oldbalanceDest, Transaction.newbalanceDest,predict_fraud([Transaction.amount, Transaction.oldbalanceOrg, Transaction.newbalanceOrig, Transaction.oldbalanceDest, Transaction.newbalanceDest, Transaction.isFlaggedFraud]), Transaction.isFlaggedFraud, Transaction.mail)
 
 @app.get("/get_transaction_details")
 def get_transaction(user_id: str):
-    return get_transaction_details(user_id)
+    return get_transaction_details(user_id) 

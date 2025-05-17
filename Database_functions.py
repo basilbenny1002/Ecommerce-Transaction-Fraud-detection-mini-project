@@ -26,7 +26,7 @@ def add_new_user(mail: str, password: str, user_id: str, name: str):
         API_KEY = generate_api_key(16)
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
-        cursor.execute("CREATE TABLE IF NOT EXISTS USERS (user_id VARCHAR(255) primary key, name varxhar(25), mail VARCHAR(255), password VARCHAR(255), API_KEY VARCHAR(255))") 
+        cursor.execute("CREATE TABLE IF NOT EXISTS USERS (user_id VARCHAR(255) primary key, name varchar(25), mail VARCHAR(255), password VARCHAR(255), API_KEY VARCHAR(255))") 
         cursor.execute(f"INSERT INTO USERS VALUES ('{user_id}', '{name}', '{mail}', '{password}', '{API_KEY}')")
         conn.commit()
         conn.close()
@@ -40,13 +40,15 @@ def add_new_user(mail: str, password: str, user_id: str, name: str):
         print("data inserted successfully")
         return JSONResponse(status_code=200, content={"Status_code": 200, "Message": "Success", "API_KEY": API_KEY})    
 
-def get_user_data(provided_password: str, user_id: str = None, mail: str = None):
-    if not user_id and not mail:
+def get_user_data(provided_password: str, mail: str ):
+    if not mail:
         return JSONResponse(status_code=400, content={"Status_code": 400, "Message": "No user_id or mail provided"})
     try:
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
-        cursor.execute(f"SELECT * FROM USERS WHERE user_id = '{user_id if user_id else mail}'") #TODO, change the logic
+        query = f"SELECT * FROM USERS WHERE mail = '{mail}'"
+        print(query, flush=True)
+        cursor.execute(query) 
         data = cursor.fetchall()
         if not data:
             return JSONResponse(status_code=404, content={"Status_code": 404, "Message": "User not found"})
@@ -72,7 +74,7 @@ def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  o
         print(f"An error occurred {e}")
         return
     else:
-        return{"Status_code": 200, "Message": "Success"}
+        return{"Status_code": 200, "Message": "Success", "Prediction": isFraud}
 def get_transaction_details(user_id: str):
     try:
         conn = sqlite3.connect('users.db') 
