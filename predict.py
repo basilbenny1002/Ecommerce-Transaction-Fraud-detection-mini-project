@@ -9,42 +9,76 @@ def format_predictions(data: list):
         print(type(i))
         if type(i) == int or type(i) == float:
             thing.append(i)
-        elif str(i) == "true":
-            thing.append(0)
-        elif i == "CASH OUT":
-            thing.extend([True, False, False, False])
+        # elif str(i) == "true":
+        #     thing.append(1)
+        # elif str(i) == "false":
+        #     thing.append(0)
+        elif i == "CASH_IN":
+            thing.extend([True, False, False, False, False])
+            break
+        elif i == "CASH_OUT":
+            thing.extend([False,True, False, False, False])
             break
         elif i == "DEBIT":
-            thing.extend([False, True, False, False])
+            thing.extend([False,False, True, False, False])
             break
         elif i == "PAYMENT":
-            thing.extend([False, False, True, False])
+            thing.extend([False,False, False, True, False])
             break
         elif i == "TRANSFER":
-            thing.extend([False, False, False, True])
+            thing.extend([False,False, False, False, True])
             break
         else:
-            print("Something is serioudly wrong")
-    print(thing)
-    predict_fraud(thing)
+            print("Something is seriously wrong")
+    print(thing, flush=True)
+    return thing
+    
             
     
+# def predict_fraud(data: list):
+#     with open("model.pkl", "rb") as file:
+#         loaded_model = pickle.load(file)
+
+#     if DEVICE == 'cuda':
+#         input_data = cp.array([data])
+#         predictions = loaded_model.predict(input_data)
+
+#         predictions = (predictions > 0.5).astype(int)
+#     else:
+#         input_data = np.array([data])
+#         predictions = loaded_model.predict(input_data)
+#     print(predictions)
+#     return predictions[0]
+
+
+# if __name__ == '__main__':
+#     # data = [181.00, 181.0, 0.00, 0.0, 0.0, "true","TRANSFER"]
+#     # print(format_predictions(data))
+#     # print(predict_fraud([181.0, 0.0, 0.0, 0.0, 0.0, 1, False, False, False, True]))
+#     print(predict_fraud([181.00,          181.0,            0.00,             0.0,             0.0,                       0,          False,       False,         False,           True]))
+
+import pickle
+import random
+import numpy as np
 def predict_fraud(data: list):
+    # data = [181.00,          181.0,            0.00,             0.0,             0.0,                       0,          False,       False,         False,           True]
+    # Load the model
+    print(data)
+    return random.randint(0,1)
     with open("model.pkl", "rb") as file:
         loaded_model = pickle.load(file)
 
-    if DEVICE == 'cuda':
-        input_data = cp.array([data])
-        predictions = loaded_model.predict(input_data)
+    # Example input data
+    input_data = np.array([data])
 
-        predictions = (predictions > 0.5).astype(int)
-    else:
-        input_data = np.array([data])
-        predictions = loaded_model.predict(input_data)
-
-    print ("Predictions:", predictions[0])
+    # Make predictions
+    predictions = loaded_model.predict(input_data,)
+    print(predictions[0], flush=True)
+    return int(predictions[0])
 
 
 if __name__ == '__main__':
-    data = [181.00, 181.0, 0.00, 0.0, 0.0, "true","TRANSFER"]
-    print(format_predictions(data))
+    # import pandas
+    # data = pandas.read_csv("onlinefraud.csv")
+    # print(len(data['step'].tolist()))
+    print(predict_fraud([181.00,          181.0,            0.00  ,       21182.0      ,       0.0    ,         0      ,   False  ,         True  ,     False,         False,          False]))

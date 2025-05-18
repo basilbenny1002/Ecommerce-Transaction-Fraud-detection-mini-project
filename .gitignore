@@ -4,3 +4,6 @@ X_test.txt
 .streamlit/config.toml
 test.py
 __pycache__/
+traincpy.py
+./users.db
+users.db
