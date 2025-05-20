@@ -2,6 +2,12 @@ import sqlite3
 from fastapi.responses import JSONResponse
 import random
 import string
+import smtplib
+from email.mime.text import MIMEText
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 def generate_api_key(length):
     characters = string.ascii_letters + string.digits
@@ -29,12 +35,12 @@ def add_new_user(mail: str, password: str, user_id: str, name: str):
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS USERS (user_id VARCHAR(255) primary key, name varchar(25), mail VARCHAR(255), password VARCHAR(255), API_KEY VARCHAR(255))") 
-        try:
-            cursor.execute(f"SELECT 1 FROM USERS WHERE mail =  ?", (mail,))
-            if cursor.fetchall:
-                return JSONResponse(status_code=400, content={"Status_code": 400, "Message": "User with this mail already exists."})
-        except Exception as e:
-                return JSONResponse(status_code=500, content={"Status_code": 500, "Message": "Failed{e}"})
+        # try:
+        #     cursor.execute(f"SELECT 1 FROM USERS WHERE mail =  ?", (mail,))
+        #     if cursor.fetchall:
+        #         return JSONResponse(status_code=400, content={"Status_code": 400, "Message": "User with this mail already exists."})
+        # except Exception as e:
+        #         return JSONResponse(status_code=500, content={"Status_code": 500, "Message": "Failed{e}"})
     
         cursor.execute(f"INSERT INTO USERS VALUES ('{user_id}', '{name}', '{mail}', '{password}', '{API_KEY}')")
         conn.commit()
@@ -56,9 +62,10 @@ def get_user_data(provided_password: str, mail: str ):
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
         query = f"SELECT * FROM USERS WHERE mail = '{mail}'"
-        print(query, flush=True)
+        # print(query, flush=True)
         cursor.execute(query) 
         data = cursor.fetchall()
+        
         if not data:
             return JSONResponse(status_code=404, content={"Status_code": 404, "Message": "User not found"})
     except Exception as e:
@@ -66,8 +73,8 @@ def get_user_data(provided_password: str, mail: str ):
         return JSONResponse(status_code=500, content={"Status_code": 500, "Message": "Failed"})
     else:
         id, name, mail, password, api_key = data[0]
-        print("password:" + password, flush=True)
-        print("given password:" + provided_password, flush=True)
+        # print("password:" + password, flush=True)
+        # print("given password:" + provided_password, flush=True)
         if provided_password != password:
             return JSONResponse(status_code=401, content={"Status_code": 401, "Message": "Password is incorrect"})
         return JSONResponse(status_code=200, content={"Status_code": 200, "Message": "Success", "UserID": id,"Name": name, "API_KEY": api_key})
@@ -105,9 +112,11 @@ def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  o
         ))        
         conn.commit()
         conn.close()
+        if isFraud == 1:
+            send_mail(user_mail, amount)
     except Exception as e:
         print(f"An error occurred {e}")
-        return
+        return JSONResponse(status_code=500, content={"Status_code": 500, "Message": "Failed"})
     else:
         print(isFraud, flush=True)
         return{"Status_code": 200, "Message": "Success", "Prediction": isFraud}
@@ -127,10 +136,26 @@ def get_transaction_details(user_id: str):
         print(data)
         # cursor.execute("SELECT * FROM TRANSACTIONS")
         # print(cursor.fetchall(), flush=True)
+        
         if not data:
             return JSONResponse(status_code=404, content={"Status_code": 404, "Message": "User not found"}) 
         return JSONResponse(status_code=200, content={"Status_code": 200, "Message":"Success", "Content":{i: list(data[i]) for i in range(len(data))}})
         
+
+
+def send_mail(mail_id, amount):
+    print("Mail send successfully", flush=True)
+    # return
+    s = smtplib.SMTP("smtp.gmail.com", 587)
+    s.starttls()
+    s.login(os.getenv("mail"), os.getenv("pass"))
+    msg = MIMEText(f"Hey, your recent transaction of {amount} have been detected as a scam, please do the necessary steps")
+    sender = "fraudguard@gmail.com"
+    msg["Subject"] = "Fraudulent Transaction Alert"
+    msg["From"] = sender
+    msg["To"] = mail_id
+    s.sendmail(sender, mail_id, msg.as_string())
+
 
 
 

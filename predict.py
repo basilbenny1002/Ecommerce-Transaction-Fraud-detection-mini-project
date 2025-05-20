@@ -12,7 +12,7 @@ def format_predictions(data: list):
         # elif str(i) == "true":
         #     thing.append(1)
         # elif str(i) == "false":
-        #     thing.append(0)
+        #     thing.append(0) 
         elif i == "CASH_IN":
             thing.extend([True, False, False, False, False])
             break
@@ -64,7 +64,7 @@ def predict_fraud(data: list):
     # data = [181.00,          181.0,            0.00,             0.0,             0.0,                       0,          False,       False,         False,           True]
     # Load the model
     print(data)
-    return random.randint(0,1)
+    # return random.randint(0,1)
     with open("model.pkl", "rb") as file:
         loaded_model = pickle.load(file)
 

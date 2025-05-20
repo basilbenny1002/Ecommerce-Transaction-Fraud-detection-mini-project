@@ -7,3 +7,4 @@ __pycache__/
 traincpy.py
 ./users.db
 users.db
+.env

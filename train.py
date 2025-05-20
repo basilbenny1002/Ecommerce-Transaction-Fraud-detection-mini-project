@@ -7,10 +7,10 @@ import numpy as np
 df = pd.read_csv('onlinefraud.csv')
 #print(df.head())
 #Remove unnecessary columns
-df = pd.get_dummies(df, columns=['type'], drop_first=True)
-df = df.drop(columns=['nameOrig', 'nameDest'])
+df = pd.get_dummies(df, columns=['type'], drop_first=True) 
+df = df.drop(columns=['nameOrig', 'nameDest'])              
 
-df = df.drop(columns=['step'],)
+df = df.drop(columns=['step'])
 
 # Separate features (X) and target variable (y)
 X = df.drop('isFraud', axis=1)
@@ -18,9 +18,9 @@ y = df['isFraud']
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-print(type(X_test))
-with open('X_test.txt', 'w') as f:
-    f.write(df.head().to_string())
+# print(type(X_test))
+# with open('X_test.txt', 'w') as f:
+#     f.write(df.head().to_string())
 
 # raise NotImplementedError
 # Initialize XGBoost classifier
@@ -32,6 +32,7 @@ xgb_model = xgb.XGBClassifier(objective='binary:logistic',  # For binary classif
 xgb_model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
 
 #Saving the mdoel in .pkl format
+
 with open('model.pkl', 'wb') as f:
     pickle.dump(xgb_model, f)
 
