@@ -72,7 +72,7 @@ def predict_fraud(data: list):
     input_data = np.array([data])
 
     # Make predictions
-    predictions = loaded_model.predict(input_data,)
+    predictions = loaded_model.predict(input_data)
     print(predictions[0], flush=True)
     return int(predictions[0])
 

@@ -29,6 +29,13 @@ def add_new_user(mail: str, password: str, user_id: str, name: str):
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS USERS (user_id VARCHAR(255) primary key, name varchar(25), mail VARCHAR(255), password VARCHAR(255), API_KEY VARCHAR(255))") 
+        try:
+            cursor.execute(f"SELECT 1 FROM USERS WHERE mail =  ?", (mail,))
+            if cursor.fetchall:
+                return JSONResponse(status_code=400, content={"Status_code": 400, "Message": "User with this mail already exists."})
+        except Exception as e:
+                return JSONResponse(status_code=500, content={"Status_code": 500, "Message": "Failed{e}"})
+    
         cursor.execute(f"INSERT INTO USERS VALUES ('{user_id}', '{name}', '{mail}', '{password}', '{API_KEY}')")
         conn.commit()
         conn.close()
@@ -59,6 +66,8 @@ def get_user_data(provided_password: str, mail: str ):
         return JSONResponse(status_code=500, content={"Status_code": 500, "Message": "Failed"})
     else:
         id, name, mail, password, api_key = data[0]
+        print("password:" + password, flush=True)
+        print("given password:" + provided_password, flush=True)
         if provided_password != password:
             return JSONResponse(status_code=401, content={"Status_code": 401, "Message": "Password is incorrect"})
         return JSONResponse(status_code=200, content={"Status_code": 200, "Message": "Success", "UserID": id,"Name": name, "API_KEY": api_key})

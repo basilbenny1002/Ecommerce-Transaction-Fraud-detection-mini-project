@@ -8,19 +8,18 @@ from typing import Union
 from predict import format_predictions, predict_fraud
 
 
-
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"],
     allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
 
-@app.exception_handler(Exception)
-async def validation_exception_handler(request: Request, exc: Exception):
-    print("Exception:", exc)
-    return JSONResponse(
-        status_code=500,
-        content={"detail": str(exc)},
-    )
+# @app.exception_handler(Exception)
+# async def validation_exception_handler(request: Request, exc: Exception):
+#     print("Exception:", exc)
+#     return JSONResponse(
+#         status_code=500,
+#         content={"detail": str(exc)},
+#     )
 
 
 @app.get("/")
@@ -49,9 +48,6 @@ class User(BaseModel):
     password: str
 class key(BaseModel):
     user_id: str
-
-
-
 
 
 @app.post("/signup/")
