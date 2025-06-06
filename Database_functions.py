@@ -79,8 +79,8 @@ def get_user_data(provided_password: str, mail: str ):
             return JSONResponse(status_code=401, content={"Status_code": 401, "Message": "Password is incorrect"})
         return JSONResponse(status_code=200, content={"Status_code": 200, "Message": "Success", "UserID": id,"Name": name, "API_KEY": api_key})
 
-
-def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  oldbalanceDest,  newbalanceDest,  isFraud,  isFlaggedFraud, user_mail, type):
+   
+def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  oldbalanceDest,  newbalanceDest,  isFraud,  isFlaggedFraud, user_mail, type, method="GUI"):
     try:
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
@@ -96,7 +96,8 @@ def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  o
             isFlaggedFraud    INT,
             user_mail         VARCHAR(255),
             type              VARCHAR(255),
-            TIMES DATETIME DEFAULT CURRENT_TIMESTAMP
+            TIMES DATETIME DEFAULT CURRENT_TIMESTAMP, 
+            method varchar(20)
         )
         """)
         cursor.execute("""
@@ -104,11 +105,11 @@ def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  o
             user_id, amount, oldbalanceOrg, newbalanceOrig,
             oldbalanceDest, newbalanceDest, isFraud,
             isFlaggedFraud, user_mail, type
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
         user_id, amount, oldbalanceOrg, newbalanceOrig,
         oldbalanceDest, newbalanceDest, isFraud,
-        isFlaggedFraud, user_mail, type
+        isFlaggedFraud, user_mail, type, method
         ))        
         conn.commit()
         conn.close()
@@ -120,7 +121,16 @@ def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  o
     else:
         print(isFraud, flush=True)
         return{"Status_code": 200, "Message": "Success", "Prediction": isFraud}
+
 def get_transaction_details(user_id: str):
+    try:
+        conn = sqlite3.connect('users.db') 
+        cursor = conn.cursor()
+    except Exception as e:
+        print(f"An error occurred {e}")
+
+
+def get_all_transaction_details(user_id: str):
     try:
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
@@ -157,6 +167,23 @@ def send_mail(mail_id, amount):
     s.sendmail(sender, mail_id, msg.as_string())
 
 
+
+
+
+def get_stats(user_id: str):
+    conn = sqlite3.connect('users.db') 
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT COUNT(*) FROM TRANSACTIONS WHERE user_id = ?", (user_id,))
+        total_rows = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM TRANSACTIONS WHERE user_id = ? AND isFraud = 1", (user_id,))
+        fraud_rows = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM TRANSACTIONS WHERE user_id = ? AND method = ?", (user_id, "API"))
+        api_rows = cursor.fetchone()[0]
+        return JSONResponse(status_code=200, content={"Status_code": 200, "total_checks": total_rows,"api_calls": api_rows, "frauds_detected": fraud_rows})
+    except Exception as e:
+        print(f"An error occurred {e}")
+        return JSONResponse(status_code=500, content={"Status_code": 500, "Message": "Failed"})
 
 
 if __name__ == '__main__':

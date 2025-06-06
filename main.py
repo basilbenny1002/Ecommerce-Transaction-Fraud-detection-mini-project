@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from Database_functions import add_new_user, get_user_data, add_transaction_details, get_transaction_details, get_new_api_key
 from typing import Union
 from predict import format_predictions, predict_fraud
-
+from Database_functions import get_stats as gs
+from Database_functions import get_all_transaction_details
 
 app = FastAPI()
 app.add_middleware(
@@ -74,8 +75,12 @@ def add_transaction(data: Transaction):
 @app.get("/get_transaction_details")
 def get_transaction(user_id: str):
     print(user_id, flush=True)
-    return get_transaction_details(user_id) 
+    return get_all_transaction_details(user_id) 
 
 @app.post("/regenerate_key/")
 def generate_new_api_key(User: key):
     return get_new_api_key(User.user_id)
+
+# @app.post("/get_stats")
+# def get_stats(User: key):
+#     return gs(User.user_id)

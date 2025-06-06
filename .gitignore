@@ -8,3 +8,9 @@ traincpy.py
 ./users.db
 users.db
 .env
+response.txt
+results.csv
+link_data_collector.py
+fraud_scraper_full.py
+scam_Advisor.py
+urls.txt
