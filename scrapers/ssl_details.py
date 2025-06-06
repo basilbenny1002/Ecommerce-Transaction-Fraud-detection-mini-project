@@ -52,15 +52,17 @@ def get_ssl_details(url):
         print(f"SSL certificate expire date: {expire_date}")
         print(f"SSL certificate issuer organization name: {issuer_org_name}")
         print(f"SSL certificate issuer organization ID: {org_id}")
+        return [org_id]
 
     except Exception as e:
-        print(f"Error retrieving SSL info: {e}")
+        # print(f"Error retrieving SSL info: {e}")
+        return [11]
     finally:
         conn.close()
 
     
-if __name__ == "__main__":
-    url_input = "www.amazon.com" # Let's test with Amazon
-    if not url_input.startswith("http"):
-        url_input = "https://" + url_input
-    get_ssl_details(url_input)
+# if __name__ == "__main__":
+#     url_input = "www.amazon.com" # Let's test with Amazon
+#     if not url_input.startswith("http"):
+#         url_input = "https://" + url_input
+#     get_ssl_details("amazon.com")

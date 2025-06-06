@@ -26,10 +26,11 @@ def domain_rank(domain):
             reader = csv.reader(file)
             for rank, row in enumerate(reader, start=1):
                 if row and domain.strip().lower() == row[1].strip().lower():
-                    return rank
+                    return [1, int(rank)]
     except Exception as e:
         print(f"[!] Failed to read CSV: {e}")
-    return -1
+        return [0, -1]
+    return [0, -1]
 
 def download_tranco_if_not_exists():
     today_str = datetime.today().strftime('%Y-%m-%d')

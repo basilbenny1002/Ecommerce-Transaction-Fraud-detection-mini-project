@@ -1,6 +1,31 @@
 import pickle
 import numpy as np
 import pandas as pd # Still needed for the powerful to_datetime conversion
+from scrapers.ssl_details import get_ssl_details
+from scrapers.tranco_list import domain_rank
+from scrapers.site_scores import get_trust_score, has_sitejabber_reviews
+from scrapers.domain_age import get_domain_registration_details
+from scrapers.utils import analyze_url, analyze_website_features
+
+
+def format_data(urlr: str, credit_card_payment: bool = None , money_back_option: bool = None, cash_on_delivery: bool = None, crypto_payment: bool = None, free_contact_mails: bool = None, logo_url: bool = None):
+    data = []
+    details, shortened_url  = analyze_url(urlr)
+    data.extend(details)
+    if not credit_card_payment or not money_back_option or not cash_on_delivery or not crypto_payment or not free_contact_mails or not logo_url:
+        features  = analyze_website_features(shortened_url)
+        for key, value in features.items():
+            data.append(int(value))
+    data.extend(get_ssl_details(shortened_url))
+    data.extend(get_domain_registration_details(shortened_url))
+    data.extend(get_trust_score(shortened_url))
+    data.append(has_sitejabber_reviews(shortened_url))
+    data.extend(domain_rank(shortened_url))
+    print(data)
+    return predict_fraud_from_list(url, data)
+
+    
+
 
 def predict_fraud_from_list(shop_url, feature_values):
     """
@@ -28,7 +53,7 @@ def predict_fraud_from_list(shop_url, feature_values):
         # Use pandas' robust `to_datetime` to parse the date string
         date_val = pd.to_datetime(processed_values[DATE_INDEX])
         # Convert to a UNIX timestamp (in seconds)
-        timestamp = int(date_val.timestamp())
+        timestamp = int(date_val.timestamp()) 
         processed_values[DATE_INDEX] = timestamp
     except (ValueError, TypeError):
         # If conversion fails, use a neutral value like -1
@@ -42,7 +67,7 @@ def predict_fraud_from_list(shop_url, feature_values):
     # --- Load Model and Predict ---
 
     # Load the trained model from the file
-    with open('model.pkl', 'rb') as f:
+    with open('models/website_model.pkl', 'rb') as f:
         model = pickle.load(f)
 
     # Get the raw prediction (0 or 1)
@@ -62,34 +87,41 @@ def predict_fraud_from_list(shop_url, feature_values):
 # --- Example Usage ---
 
 # The URL of the shop you want to check
-shop_url_input = "https://www.amazon.com"
+# shop_url_input = "https://www.amazon.com"
 
-# Provide the feature values in the exact order the model was trained on.
-# All values must be present.
-input_features = [
-    17,                             # Domain length
-    3,                              # Top domain length
-    1,                              # Presence of 'www'
-    0,                              # Number of digits
-    13,                             # Number of letters
-    1,                              # Number of dots
-    0,                              # Number of hyphens
-    1,                              # Has credit card payment
-    1,                              # Has money-back option
-    1,                              # Has cash on delivery
-    0,                              # Accepts crypto?
-    1,                              # Has free contact email
-    1,                              # Has logo
-    1,                              # Org in known SSL org list
-    0,                              # Not a young domain
-    "1995-07-30 00:00:00",          # Domain registration date (at index 15)
-    1,                              # Has TrustPilot reviews
-    4.6,                            # High TrustPilot score
-    1,                              # SiteJabber reviews exist
-    1,                              # Present in Tranco list
-    100                             # Tranco rank
-]
+# # Provide the feature values in the exact order the model was trained on.
+# # All values must be present.
+# input_features = [
+#     17,                             # Domain length
+#     3,                              # Top domain length
+#     1,                              # Presence of 'www'
+#     0,                              # Number of digits
+#     13,                             # Number of letters
+#     1,                              # Number of dots
+#     0,                              # Number of hyphens
+#     1,                              # Has credit card payment
+#     1,                              # Has money-back option
+#     1,                              # Has cash on delivery
+#     0,                              # Accepts crypto?
+#     1,                              # Has free contact email
+#     1,                              # Has logo
+#     1,                              # Org in known SSL org list
+#     0,                              # Not a young domain
+#     "1995-07-30 00:00:00",          # Domain registration date (at index 15)
+#     1,                              # Has TrustPilot reviews
+#     4.6,                            # High TrustPilot score
+#     1,                              # SiteJabber reviews exist
+#     1,                              # Present in Tranco list
+#     100                             # Tranco rank
+# ]
 
-# Get the prediction
-result = predict_fraud_from_list(shop_url_input, input_features)
-print(result)
+# # Get the prediction
+# result = predict_fraud_from_list(shop_url_input, input_features)
+# print(result)
+
+
+
+data, url = format_data("https://www.amazon.in/hz/mobile/mission?p=6HZjbXAv%2BuCoQJnp5zydwUz0qaZiQDzrfvlOokAcp3zCZahWUKXiCXf26y1CqQKevaul2MjjgTCBw4Qg5CblsMQT7g40FQcIIVPUi7gfaCwr1J2NYqr2H7nLaiLcrtLuznPAofGpKOkEVvfQ9xhbjJVZhxWItmRqmsZRWXtNno8Ut8vF3EQgpsTuFR%2Bi3F0ME6O9l6gZBJQB76yUGh98baIL1%2FhU%2BU3CVl2gf%2B%2B3Cck36600VX%2FO08gFEtDS5cnQpSkFbEUUkhJK2Cbef4T0xNx5CUFXlDxhiZ5DCt8Jkevx5oqp%2BikrEGmBTGfqL6LBAbwL1gLS66eHlOAe4xKzVeolBzcYQWEmdnVPW0DUDtbn%2FNEHU9NJcz9m3MdUSFOr&ref_=ci_mcx_mi&pf_rd_r=60H00ASZW7XB4VWXXPNQ&pf_rd_p=45c1a5b4-dab8-4658-948a-91185ec4c179&pd_rd_r=5d2f1862-a090-4f94-8dfe-6c931ff26092&pd_rd_w=s33dL&pd_rd_wg=xqEa0")
+
+print(predict_fraud_from_list(url, data))
+
