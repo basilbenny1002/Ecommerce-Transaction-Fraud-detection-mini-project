@@ -3,11 +3,11 @@ from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
-from Database_functions import add_new_user, get_user_data, add_transaction_details, get_transaction_details, get_new_api_key
+from database.Database_functions import add_new_user, get_user_data, add_transaction_details, get_transaction_details, get_new_api_key
 from typing import Union
-from predict import format_predictions, predict_fraud
-from Database_functions import get_stats as gs
-from Database_functions import get_all_transaction_details
+from predictors.transaction_predict import format_predictions, predict_fraud
+from database.Database_functions import get_stats as gs
+from database.Database_functions import get_all_transaction_details
 
 app = FastAPI()
 app.add_middleware(

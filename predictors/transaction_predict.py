@@ -65,7 +65,7 @@ def predict_fraud(data: list):
     # Load the model
     print(data)
     return random.randint(0,1)
-    with open("model.pkl", "rb") as file:
+    with open("models/transaction_model.pkl", "rb") as file:
         loaded_model = pickle.load(file)
 
     # Example input data

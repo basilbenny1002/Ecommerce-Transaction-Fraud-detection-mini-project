@@ -33,7 +33,7 @@ xgb_model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
 
 #Saving the mdoel in .pkl format
 
-with open('model.pkl', 'wb') as f:
+with open('models/transaction_model.pkl', 'wb') as f:
     pickle.dump(xgb_model, f)
 
 # Make predictions
