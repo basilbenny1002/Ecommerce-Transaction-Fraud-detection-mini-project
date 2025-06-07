@@ -5,6 +5,7 @@ import string
 import smtplib
 from email.mime.text import MIMEText
 import os
+from fastapi import Header, HTTPException
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -110,13 +111,13 @@ def add_transaction_details(target, user_id, amount,  oldbalanceOrg,  newbalance
         )
         """)
 
-        # Prepare confidence value
-        if isinstance(confidence, str) and '%' in confidence:
-            parsed_confidence = float(confidence.replace('%', '')) / 100.0
-        elif isinstance(confidence, (int, float)):
-            parsed_confidence = float(confidence)
-        else:
-            parsed_confidence = None # Or a default float value like 0.0
+        # # Prepare confidence value
+        # if isinstance(confidence, str) and '%' in confidence:
+        #     parsed_confidence = float(confidence.replace('%', '')) / 100.0
+        # elif isinstance(confidence, (int, float)):
+        #     parsed_confidence = float(confidence)
+        # else:
+        #     parsed_confidence = None # Or a default float value like 0.0
 
         # Handle "NULL" strings for numeric/integer fields
         db_amount = None if amount == "NULL" else amount
@@ -135,7 +136,7 @@ def add_transaction_details(target, user_id, amount,  oldbalanceOrg,  newbalance
         """, (
         target, user_id, db_amount, db_oldbalanceOrg, db_newbalanceOrig,
         db_oldbalanceDest, db_newbalanceDest, isFraud,
-        db_isFlaggedFraud, user_mail, type, method, target_type, parsed_confidence
+        db_isFlaggedFraud, user_mail, type, method, target_type, confidence
         ))        
         conn.commit()
         if isFraud == 1:
@@ -310,7 +311,36 @@ def clear_history(user_id: str):
     finally:
         if conn:
             conn.close()
-    
+
+def validate_api_key(authorization: str = Header(...)):
+    try:
+        scheme, token = authorization.split(" ")
+        if scheme.lower() != "bearer":
+            raise ValueError()
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid Authorization header")
+
+    # Add your actual API key check here:
+    user_id = getet_user_id_from_api_key(token)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    return user_id
+
+def getet_user_id_from_api_key(key: str):
+    conn = None
+    try:
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id FROM USERS WHERE API_KEY = ?", (key,))
+        result = cursor.fetchone()
+        return result[0] if result else None
+    except Exception as e:
+        return None
+    finally:
+        if conn:
+            conn.close()
+
 
 # if __name__ == '__main__':
 #     conn = None

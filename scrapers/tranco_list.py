@@ -6,7 +6,7 @@ import sys
 import io
 import csv
 
-sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
+# sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
 cache_folder = "tranco"
 
 
@@ -44,7 +44,7 @@ def download_tranco_if_not_exists():
         print(f"[✓] Tranco list for today ({today_str}) already exists.")
         return today_filename
 
-    # ❌ Delete yesterday's file if exists
+   
     yesterday_str = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
     yesterday_filename = os.path.join(cache_folder, f"tranco_list_{yesterday_str}.csv")
     if os.path.exists(yesterday_filename):
