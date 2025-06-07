@@ -35,7 +35,7 @@ The goal is to classify online transactions as either **fraudulent** or **legiti
 3. Run the script:
 
    ```
-   python main.py
+   uvicorn app.main:app --reload   
    ```
 
 > 💡 *This is a simple project meant for learning and academic purposes only.*
