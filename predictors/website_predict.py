@@ -80,12 +80,13 @@ def predict_fraud_from_list(shop_url, feature_values):
 
     # Get the raw prediction (0 or 1)
     prediction_val = int(model.predict(input_array)[0])
-    # Get the probability of the positive class (fraudulent)
-    probability = float(model.predict_proba(input_array)[0][1])
+    
+    probability = float(model.predict_proba(input_array)[0][prediction_val]) 
 
     # Determine the prediction label
     prediction_label = "Fraudulent" if prediction_val == 1 else "Legitimate"
-    return prediction_val, f"{probability:.2%}"
+    print(probability, flush=True)
+    return prediction_val, round(probability * 100, 2)
     return {
         "url": shop_url,
         "prediction": prediction_label,
@@ -129,7 +130,8 @@ def predict_fraud_from_list(shop_url, feature_values):
 
 
 
-data, url = format_data("https://www.amazon.in/hz/mobile/mission?p=6HZjbXAv%2BuCoQJnp5zydwUz0qaZiQDzrfvlOokAcp3zCZahWUKXiCXf26y1CqQKevaul2MjjgTCBw4Qg5CblsMQT7g40FQcIIVPUi7gfaCwr1J2NYqr2H7nLaiLcrtLuznPAofGpKOkEVvfQ9xhbjJVZhxWItmRqmsZRWXtNno8Ut8vF3EQgpsTuFR%2Bi3F0ME6O9l6gZBJQB76yUGh98baIL1%2FhU%2BU3CVl2gf%2B%2B3Cck36600VX%2FO08gFEtDS5cnQpSkFbEUUkhJK2Cbef4T0xNx5CUFXlDxhiZ5DCt8Jkevx5oqp%2BikrEGmBTGfqL6LBAbwL1gLS66eHlOAe4xKzVeolBzcYQWEmdnVPW0DUDtbn%2FNEHU9NJcz9m3MdUSFOr&ref_=ci_mcx_mi&pf_rd_r=60H00ASZW7XB4VWXXPNQ&pf_rd_p=45c1a5b4-dab8-4658-948a-91185ec4c179&pd_rd_r=5d2f1862-a090-4f94-8dfe-6c931ff26092&pd_rd_w=s33dL&pd_rd_wg=xqEa0")
+# data, url = format_data("https://www.amazon.in/hz/mobile/mission?p=6HZjbXAv%2BuCoQJnp5zydwUz0qaZiQDzrfvlOokAcp3zCZahWUKXiCXf26y1CqQKevaul2MjjgTCBw4Qg5CblsMQT7g40FQcIIVPUi7gfaCwr1J2NYqr2H7nLaiLcrtLuznPAofGpKOkEVvfQ9xhbjJVZhxWItmRqmsZRWXtNno8Ut8vF3EQgpsTuFR%2Bi3F0ME6O9l6gZBJQB76yUGh98baIL1%2FhU%2BU3CVl2gf%2B%2B3Cck36600VX%2FO08gFEtDS5cnQpSkFbEUUkhJK2Cbef4T0xNx5CUFXlDxhiZ5DCt8Jkevx5oqp%2BikrEGmBTGfqL6LBAbwL1gLS66eHlOAe4xKzVeolBzcYQWEmdnVPW0DUDtbn%2FNEHU9NJcz9m3MdUSFOr&ref_=ci_mcx_mi&pf_rd_r=60H00ASZW7XB4VWXXPNQ&pf_rd_p=45c1a5b4-dab8-4658-948a-91185ec4c179&pd_rd_r=5d2f1862-a090-4f94-8dfe-6c931ff26092&pd_rd_w=s33dL&pd_rd_wg=xqEa0")
 
-print(predict_fraud_from_list(url, data))
+# print(predict_fraud_from_list(url, data))
 
+# print(format_data("https://www.amazon.in/"))

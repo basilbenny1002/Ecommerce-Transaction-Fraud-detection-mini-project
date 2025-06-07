@@ -14,19 +14,19 @@ def format_predictions(data: list):
         # elif str(i) == "false":
         #     thing.append(0) 
         elif i == "CASH_IN":
-            thing.extend([True, False, False, False, False])
+            thing.extend([False, False, False, False])
             break
         elif i == "CASH_OUT":
-            thing.extend([False,True, False, False, False])
+            thing.extend([True, False, False, False])
             break
         elif i == "DEBIT":
-            thing.extend([False,False, True, False, False])
+            thing.extend([False, True, False, False])
             break
         elif i == "PAYMENT":
-            thing.extend([False,False, False, True, False])
+            thing.extend([False, False, True, False])
             break
         elif i == "TRANSFER":
-            thing.extend([False,False, False, False, True])
+            thing.extend([False, False, False, True])
             break
         else:
             print("Something is seriously wrong")
@@ -63,7 +63,7 @@ import numpy as np
 def predict_fraud(data: list):
     
     print(data)
-    return random.randint(0,1), 87.63
+    # return random.randint(0,1), 87.63
     with open("models/transaction_model.pkl", "rb") as file:
         loaded_model = pickle.load(file)
 
@@ -74,22 +74,17 @@ def predict_fraud(data: list):
     predictions = loaded_model.predict(input_data)
     prediction_result = int(predictions[0])
 
-        # Get the probabilities for each class (e.g., [prob_class_0, prob_class_1])
-        # This method is common for classification models to get confidence
     probabilities = loaded_model.predict_proba(input_data)
         
-        # The confidence is now the probability of the *predicted* class
-        # If prediction_result is 0, confidence is probabilities[0][0] (confidence of being not fraud)
-        # If prediction_result is 1, confidence is probabilities[0][1] (confidence of being fraud)
-    confidence = probabilities[0][prediction_result]
+    confidence = float(probabilities[0][prediction_result])
 
     print(f"Prediction: {prediction_result}, Confidence (of predicted class): {confidence:.4f}", flush=True)
         
-    return prediction_result, confidence
+    return prediction_result, round(confidence * 100, 2)
 
 
-if __name__ == '__main__':
-    # import pandas
-    # data = pandas.read_csv("onlinefraud.csv")
-    # print(len(data['step'].tolist()))
-    print(predict_fraud([181.00,          181.0,            0.00  ,       21182.0      ,       0.0    ,         0      ,   False  ,         True  ,     False,         False,          False]))
+# if __name__ == '__main__':
+#     # import pandas
+#     # data = pandas.read_csv("onlinefraud.csv")
+#     # print(len(data['step'].tolist()))
+#     print(predict_fraud([181.00,          181.0,            0.00  ,       21182.0      ,       0.0    ,         0      ,   False  ,         True  ,     False,         False,          False]))

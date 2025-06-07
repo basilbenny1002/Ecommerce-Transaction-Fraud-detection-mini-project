@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Union
 from fastapi import APIRouter
-from database.Database_functions import add_new_user, get_user_data, add_transaction_details, get_new_api_key
+from database.Database_functions import add_new_user, get_user_data, get_new_api_key, get_recent_transactions, clear_history
 from predictors.transaction_predict import format_predictions, predict_fraud
 from database.Database_functions import get_stats as gs
 from database.Database_functions import get_all_transaction_details
@@ -36,7 +36,7 @@ class key(BaseModel):
     user_id: str
 
 
-@router.post("/signup/")
+@router.post("/signup")
 def signup(User: newUser):
     print(User)
     print(type(User))
@@ -44,7 +44,7 @@ def signup(User: newUser):
     return add_new_user(User.email, User.password, User.user_id, User.name)
 
 
-@router.post("/signin/")
+@router.post("/signin")
 def login(User: User):
     print(User)
     print(type(User))
@@ -55,15 +55,23 @@ def login(User: User):
 
 
 
-@router.get("/get_transaction_details")
-def get_transaction(user_id: str):
-    print(user_id, flush=True)
-    return get_all_transaction_details(user_id) 
+@router.post("/get_transaction_details")
+def get_transaction(User: key):
+    print(User.user_id, flush=True)
+    return get_all_transaction_details(User.user_id) 
 
-@router.post("/regenerate_key/")
+@router.post("/regenerate_key")
 def generate_new_api_key(User: key):
     return get_new_api_key(User.user_id)
 
-# @router.post("/get_stats")
-# def get_stats(User: key):
-#     return gs(User.user_id)
+@router.post("/dashboard/stats")
+def get_stats(User: key):
+    return gs(User.user_id)
+
+@router.post("/recent")
+def get_recent(data: key):
+    return get_recent_transactions(data.user_id)
+    
+@router.post("/clear_history")
+def clear(data: key):
+    return clear_history(data.user_id)

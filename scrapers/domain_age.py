@@ -54,4 +54,4 @@ def get_domain_registration_details(domain_name):
 
     return [results["is_young_domain"], results["registration_date"]]
 
-print(get_domain_registration_details("google.com"))
+# print(get_domain_registration_details("google.com"))

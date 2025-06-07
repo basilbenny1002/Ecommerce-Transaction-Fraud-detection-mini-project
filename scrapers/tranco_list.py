@@ -7,10 +7,8 @@ import io
 import csv
 
 sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
-
-# Set cache dir
 cache_folder = "tranco"
-os.makedirs(cache_folder, exist_ok=True)
+
 
 def get_latest_csv(folder):
     csv_files = glob.glob(os.path.join(folder, "*.csv"))
@@ -19,6 +17,11 @@ def get_latest_csv(folder):
     return max(csv_files, key=os.path.getctime)
 
 def domain_rank(domain):
+    try:
+        os.makedirs(cache_folder, exist_ok=True)
+    except:
+        pass
+
     csv_path = download_tranco_if_not_exists()
     """Return the rank of the domain if found, else -1."""
     try:
@@ -82,7 +85,7 @@ def download_tranco_if_not_exists():
 # csv_file_path = download_tranco_if_not_exists()
 
 # Example usage:
-if True:
-    domain = "google.com"
-    rank = domain_rank(domain)
-    print(f"Rank of {domain}: {rank if rank != -1 else 'Not found'}")
+# if True:
+#     domain = "google.com"
+#     rank = domain_rank(domain)
+#     print(f"Rank of {domain}: {rank if rank != -1 else 'Not found'}")
