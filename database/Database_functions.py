@@ -80,12 +80,13 @@ def get_user_data(provided_password: str, mail: str ):
         return JSONResponse(status_code=200, content={"Status_code": 200, "Message": "Success", "UserID": id,"Name": name, "API_KEY": api_key})
 
    
-def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  oldbalanceDest,  newbalanceDest,  isFraud,  isFlaggedFraud, user_mail, type, method="GUI"):
+def add_transaction_details(target, user_id, amount,  oldbalanceOrg,  newbalanceOrig,  oldbalanceDest,  newbalanceDest,  isFraud,  isFlaggedFraud, user_mail, type, target_type, confidence, method="GUI"):
     try:
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS TRANSACTIONS (
+            target              VARCHAR(255) ,
             user_id           VARCHAR(255),
             amount            FLOAT,
             oldbalanceOrg     FLOAT,
@@ -97,19 +98,21 @@ def add_transaction_details(user_id, amount,  oldbalanceOrg,  newbalanceOrig,  o
             user_mail         VARCHAR(255),
             type              VARCHAR(255),
             TIMES DATETIME DEFAULT CURRENT_TIMESTAMP, 
-            method varchar(20)
+            method varchar(20), 
+            target_type varchar(20), 
+            confidence INT
         )
         """)
         cursor.execute("""
-        INSERT INTO TRANSACTIONS (
+        INSERT INTO TRANSACTIONS (target,
             user_id, amount, oldbalanceOrg, newbalanceOrig,
             oldbalanceDest, newbalanceDest, isFraud,
             isFlaggedFraud, user_mail, type
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-        user_id, amount, oldbalanceOrg, newbalanceOrig,
+        target, user_id, amount, oldbalanceOrg, newbalanceOrig,
         oldbalanceDest, newbalanceDest, isFraud,
-        isFlaggedFraud, user_mail, type, method
+        isFlaggedFraud, user_mail, type, method, target_type, confidence
         ))        
         conn.commit()
         conn.close()

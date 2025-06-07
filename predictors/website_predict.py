@@ -8,14 +8,22 @@ from scrapers.domain_age import get_domain_registration_details
 from scrapers.utils import analyze_url, analyze_website_features
 
 
-def format_data(urlr: str, credit_card_payment: bool = None , money_back_option: bool = None, cash_on_delivery: bool = None, crypto_payment: bool = None, free_contact_mails: bool = None, logo_url: bool = None):
+def format_data(url: str, credit_card_payment: int = None , money_back_option: int = None, cash_on_delivery: int = None, crypto_payment: int = None, free_contact_mails: int = None, logo_url: int = None):
     data = []
-    details, shortened_url  = analyze_url(urlr)
+    details, shortened_url  = analyze_url(url)
     data.extend(details)
-    if not credit_card_payment or not money_back_option or not cash_on_delivery or not crypto_payment or not free_contact_mails or not logo_url:
+    if not credit_card_payment and not money_back_option and not cash_on_delivery and not crypto_payment and not free_contact_mails and not logo_url:
         features  = analyze_website_features(shortened_url)
         for key, value in features.items():
             data.append(int(value))
+    else:
+        data.append(credit_card_payment)
+        data.append(money_back_option)
+        data.append(cash_on_delivery)
+        data.append(crypto_payment)
+        data.append(free_contact_mails)
+        data.append(logo_url)
+
     data.extend(get_ssl_details(shortened_url))
     data.extend(get_domain_registration_details(shortened_url))
     data.extend(get_trust_score(shortened_url))
@@ -77,7 +85,7 @@ def predict_fraud_from_list(shop_url, feature_values):
 
     # Determine the prediction label
     prediction_label = "Fraudulent" if prediction_val == 1 else "Legitimate"
-
+    return prediction_val, f"{probability:.2%}"
     return {
         "url": shop_url,
         "prediction": prediction_label,

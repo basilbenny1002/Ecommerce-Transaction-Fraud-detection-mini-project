@@ -53,9 +53,7 @@ def login(User: User):
     return get_user_data(User.password,User.email)
 
 
-@router.post("/predict/")
-def add_transaction(data: Transaction):
-    return add_transaction_details(data.user_id, data.amount, data.oldbalanceOrg, data.newbalanceOrig, data.oldbalanceDest, data.newbalanceDest,predict_fraud(format_predictions([data.amount, data.oldbalanceOrg, data.newbalanceOrig, data.oldbalanceDest, data.newbalanceDest, data.isFlaggedFraud, data.type])), data.isFlaggedFraud, data.mail, data.type)
+
 
 @router.get("/get_transaction_details")
 def get_transaction(user_id: str):

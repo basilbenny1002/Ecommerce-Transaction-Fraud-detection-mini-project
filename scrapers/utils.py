@@ -84,7 +84,9 @@ Return a JSON object with the following keys and boolean values (1 or 0):
 "Has free contact email"
 "Has logo"
 
-If you are unsure about a feature, the value should be fa0lse.
+If you are unsure about a feature, the value should be false(0).
+If a website url seems to be a typo, then ignore that and consider only teh raw URL provided to you. 
+Lets say I give you a url aamazon, consider it only as aamazon and don't correct it to amazon
 """
 
     try:
@@ -124,6 +126,6 @@ If you are unsure about a feature, the value should be fa0lse.
 
 
 
-url = "https://www.amazon.com/shopping/product/123"
-result = analyze_url(url)
-print(result)
+# url = "https://www.amazon.com/shopping/product/123"
+# result = analyze_url(url)
+# print(result)

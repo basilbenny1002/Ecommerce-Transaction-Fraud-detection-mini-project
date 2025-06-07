@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.database_routes import router as database_route
+from app.routes.predict_routes import router as predict_route
+
 
 app = FastAPI()
 app.add_middleware(
@@ -8,6 +10,8 @@ app.add_middleware(
     allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
 
 app.include_router(database_route)
+app.include_router(predict_route)
+
 # @app.exception_handler(Exception)
 # async def validation_exception_handler(request: Request, exc: Exception):
 #     print("Exception:", exc)
