@@ -233,7 +233,7 @@ def send_mail(mail_id, amount):
     s.starttls()
     s.login(os.getenv("mail"), os.getenv("pass"))
     msg = MIMEText(f"Hey, your recent transaction of {amount} have been detected as a scam, please do the necessary steps")
-    sender = "fraudguard@gmail.com"
+    sender = "basilbenny1002@gmail.com"
     msg["Subject"] = "Fraudulent Transaction Alert"
     msg["From"] = sender
     msg["To"] = mail_id
