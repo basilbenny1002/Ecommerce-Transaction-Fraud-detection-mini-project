@@ -228,7 +228,7 @@ def get_recent_transactions(user_id: str):
 
 def send_mail(mail_id, amount):
     print("Mail send successfully", flush=True)
-    # return
+    return #TODO uncomment to actually send the mail :DDDD
     s = smtplib.SMTP("smtp.gmail.com", 587)
     s.starttls()
     s.login(os.getenv("mail"), os.getenv("pass"))
