@@ -1,6 +1,6 @@
 import pickle
 import numpy as np
-import cupy as cp
+
 
 DEVICE = 'cuda'  # or 'cpu'
 def format_predictions(data: list):
