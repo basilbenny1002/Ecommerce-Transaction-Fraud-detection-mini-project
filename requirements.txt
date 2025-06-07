@@ -12,7 +12,6 @@ xgboost
 scikit-learn
 pandas
 numpy
-cupy
 cryptography
 tranco
 python-multipart
