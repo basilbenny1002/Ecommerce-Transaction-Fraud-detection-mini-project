@@ -90,7 +90,7 @@ async def predict(request: Request, body: PredictRequest, user_id: str = Depends
             "NULL",
             "Website",
             confidence,
-            method="GUI"
+            method="API"
         )
         return result
 
