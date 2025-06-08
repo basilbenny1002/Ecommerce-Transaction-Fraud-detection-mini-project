@@ -36,7 +36,7 @@ The goal is to classify online transactions as either **fraudulent** or **legiti
 
    ```
    uvicorn app.main:app --reload   
-4.Use this front end (@here)[https://github.com/basilbenny1002/fraud-detection]
+4.Use this front end [@here](https://github.com/basilbenny1002/fraud-detection) 
    ```
 
 > 💡 *This is a simple project meant for learning and academic purposes only.*
