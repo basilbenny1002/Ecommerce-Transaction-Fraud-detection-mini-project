@@ -128,7 +128,7 @@ def add_transaction_details(target, user_id, isFraud, target_type, confidence, d
         ))        
         conn.commit()
         if isFraud == 1 and user_mail:
-            send_mail(user_mail, str(0)) # Ensure amount is string for email
+            send_mail(user_mail, target_type, target) # Ensure amount is string for email
     except Exception as e:
         print(f"An error occurred {e}")
         return JSONResponse(status_code=500, content={"Status_code": 500, "Message": f"Failed: {e}"})
@@ -238,18 +238,30 @@ def get_recent_transactions(user_id: str):
         if conn:
             conn.close()
 
-def send_mail(mail_id, amount):
+def send_mail(mail_id,target_type, target):
     print("Mail send successfully", flush=True)
     return #TODO uncomment to actually send the mail :DDDD
-    s = smtplib.SMTP("smtp.gmail.com", 587)
-    s.starttls()
-    s.login(os.getenv("mail"), os.getenv("pass"))
-    msg = MIMEText(f"Hey, your recent transaction of {amount} have been detected as a scam, please do the necessary steps")
-    sender = "basilbenny1002@gmail.com"
-    msg["Subject"] = "Fraudulent Transaction Alert"
-    msg["From"] = sender
-    msg["To"] = mail_id
-    s.sendmail(sender, mail_id, msg.as_string())
+    
+    if target_type == "Website":
+        message = f"Hey, your recent transaction on {target} have been detected as a scam, please do the necessary steps"
+    elif target_type == "Transaction":
+        message = f"Hey, your recent transaction have been detected as a scam, please do the necessary steps"
+    try:
+        s = smtplib.SMTP("smtp.gmail.com", 587)
+        s.starttls()
+        s.login(os.getenv("mail"), os.getenv("pass"))
+        msg = MIMEText(message)
+        sender = "basilbenny1002@gmail.com"
+        msg["Subject"] = "Fraudulent Transaction Alert"
+        msg["From"] = sender
+        msg["To"] = mail_id
+        s.sendmail(sender, mail_id, msg.as_string())
+    except Exception as e:
+        print(f"An error occurred while sending email: {e}")
+    else:
+        print("Mail sent successfully", flush=True)
+        s.quit()
+
 
 
 
