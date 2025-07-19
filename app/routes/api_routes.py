@@ -6,7 +6,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from database.Database_functions import  add_transaction_details, validate_api_key
-from predictors.transaction_predict import format_predictions, predict_fraud
+# from predictors.transaction_predict import format_predictions, predict_fraud
 from predictors.website_predict import format_data, predict_fraud_from_list
 import random
 import string
