@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Union
 from fastapi import APIRouter
 from database.Database_functions import add_new_user, get_user_data, get_new_api_key, get_recent_transactions, clear_history
-from predictors.transaction_predict import format_predictions, predict_fraud
+# from predictors.transaction_predict import 
 from database.Database_functions import get_stats as gs
 from database.Database_functions import get_all_transaction_details
 

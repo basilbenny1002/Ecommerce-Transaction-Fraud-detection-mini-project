@@ -5,6 +5,7 @@ import string
 import smtplib
 from email.mime.text import MIMEText
 import os
+import json
 from fastapi import Header, HTTPException
 from dotenv import load_dotenv
 load_dotenv()
@@ -86,8 +87,9 @@ def get_user_data(provided_password: str, mail: str ):
             conn.close()
 
    
-def add_transaction_details(target, user_id, amount,  oldbalanceOrg,  newbalanceOrig,  oldbalanceDest,  newbalanceDest,  isFraud,  isFlaggedFraud, user_mail, type, target_type, confidence, method="GUI"):
+def add_transaction_details(target, user_id, isFraud, target_type, confidence, details,mail="NULL", method="GUI"):
     conn = None
+
     try:
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
@@ -95,18 +97,12 @@ def add_transaction_details(target, user_id, amount,  oldbalanceOrg,  newbalance
         CREATE TABLE IF NOT EXISTS TRANSACTIONS (
             target            VARCHAR(255) ,
             user_id           VARCHAR(255),
-            amount            FLOAT,
-            oldbalanceOrg     FLOAT,
-            newbalanceOrig    FLOAT,
-            oldbalanceDest    FLOAT,
-            newbalanceDest    FLOAT,
             isFraud           INT,
-            isFlaggedFraud    TEXT, /* Changed to TEXT to store "NULL" or integer */
             user_mail         VARCHAR(255),
-            type              VARCHAR(255),
             method            VARCHAR(20), 
             target_type       VARCHAR(20), 
-            confidence        FLOAT, /* Changed to FLOAT */
+            confidence        FLOAT /* Changed to FLOAT */,
+            details           VARCHAR(500),
             TIMES DATETIME DEFAULT CURRENT_TIMESTAMP
         )
         """)
@@ -120,27 +116,19 @@ def add_transaction_details(target, user_id, amount,  oldbalanceOrg,  newbalance
         #     parsed_confidence = None # Or a default float value like 0.0
 
         # Handle "NULL" strings for numeric/integer fields
-        db_amount = None if amount == "NULL" else amount
-        db_oldbalanceOrg = None if oldbalanceOrg == "NULL" else oldbalanceOrg
-        db_newbalanceOrig = None if newbalanceOrig == "NULL" else newbalanceOrig
-        db_oldbalanceDest = None if oldbalanceDest == "NULL" else oldbalanceDest
-        db_newbalanceDest = None if newbalanceDest == "NULL" else newbalanceDest
-        db_isFlaggedFraud = None if isFlaggedFraud == "NULL" else isFlaggedFraud
+        detail = None if details == "NULL" else json.dumps(details)
+        user_mail = None if (mail == "NULL" or not mail) else mail
 
         cursor.execute("""
         INSERT INTO TRANSACTIONS (target,
-            user_id, amount, oldbalanceOrg, newbalanceOrig,
-            oldbalanceDest, newbalanceDest, isFraud,
-            isFlaggedFraud, user_mail, type, method, target_type, confidence
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            user_id, isFraud, user_mail, method, target_type, confidence, details
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-        target, user_id, db_amount, db_oldbalanceOrg, db_newbalanceOrig,
-        db_oldbalanceDest, db_newbalanceDest, isFraud,
-        db_isFlaggedFraud, user_mail, type, method, target_type, confidence
+        target, user_id, isFraud,user_mail, method, target_type, confidence, detail
         ))        
         conn.commit()
-        if isFraud == 1:
-            send_mail(user_mail, str(amount)) # Ensure amount is string for email
+        if isFraud == 1 and user_mail:
+            send_mail(user_mail, str(0)) # Ensure amount is string for email
     except Exception as e:
         print(f"An error occurred {e}")
         return JSONResponse(status_code=500, content={"Status_code": 500, "Message": f"Failed: {e}"})
@@ -175,7 +163,19 @@ def get_all_transaction_details(user_id: str):
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
         # Ensure TRANSACTIONS table exists
-        cursor.execute("""CREATE TABLE IF NOT EXISTS TRANSACTIONS (target VARCHAR(255), user_id VARCHAR(255), amount FLOAT, oldbalanceOrg FLOAT, newbalanceOrig FLOAT, oldbalanceDest FLOAT, newbalanceDest FLOAT, isFraud INT, isFlaggedFraud TEXT, user_mail VARCHAR(255), type VARCHAR(255), method VARCHAR(20), target_type VARCHAR(20), confidence FLOAT, TIMES DATETIME DEFAULT CURRENT_TIMESTAMP)""")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS TRANSACTIONS (
+            target            VARCHAR(255) ,
+            user_id           VARCHAR(255),
+            isFraud           INT,
+            user_mail         VARCHAR(255),
+            method            VARCHAR(20), 
+            target_type       VARCHAR(20), 
+            confidence        FLOAT /* Changed to FLOAT */,
+            details           VARCHAR(500),
+            TIMES DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
         cursor.execute("SELECT * FROM TRANSACTIONS WHERE user_id = ?", (user_id,))
     except Exception as e:
         print(f"An error occurred {e}")
@@ -196,7 +196,19 @@ def get_recent_transactions(user_id: str):
         conn = sqlite3.connect('users.db') 
         cursor = conn.cursor()
         # Ensure TRANSACTIONS table exists
-        cursor.execute("""CREATE TABLE IF NOT EXISTS TRANSACTIONS (target VARCHAR(255), user_id VARCHAR(255), amount FLOAT, oldbalanceOrg FLOAT, newbalanceOrig FLOAT, oldbalanceDest FLOAT, newbalanceDest FLOAT, isFraud INT, isFlaggedFraud TEXT, user_mail VARCHAR(255), type VARCHAR(255), method VARCHAR(20), target_type VARCHAR(20), confidence FLOAT, TIMES DATETIME DEFAULT CURRENT_TIMESTAMP)""")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS TRANSACTIONS (
+            target            VARCHAR(255) ,
+            user_id           VARCHAR(255),
+            isFraud           INT,
+            user_mail         VARCHAR(255),
+            method            VARCHAR(20), 
+            target_type       VARCHAR(20), 
+            confidence        FLOAT /* Changed to FLOAT */,
+            details           VARCHAR(500),
+            TIMES DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
         # Limit the result to top 5 rows
         cursor.execute("SELECT * FROM TRANSACTIONS WHERE user_id = ? ORDER BY TIMES DESC LIMIT 5", (user_id,))
     except Exception as e:
@@ -250,7 +262,19 @@ def get_stats(user_id: str):
         cursor = conn.cursor()
         # Ensure TRANSACTIONS table exists
         try:
-            cursor.execute("""CREATE TABLE IF NOT EXISTS TRANSACTIONS (target VARCHAR(255), user_id VARCHAR(255), amount FLOAT, oldbalanceOrg FLOAT, newbalanceOrig FLOAT, oldbalanceDest FLOAT, newbalanceDest FLOAT, isFraud INT, isFlaggedFraud TEXT, user_mail VARCHAR(255), type VARCHAR(255), method VARCHAR(20), target_type VARCHAR(20), confidence FLOAT, TIMES DATETIME DEFAULT CURRENT_TIMESTAMP)""")
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS TRANSACTIONS (
+                target            VARCHAR(255) ,
+                user_id           VARCHAR(255),
+                isFraud           INT,
+                user_mail         VARCHAR(255),
+                method            VARCHAR(20), 
+                target_type       VARCHAR(20), 
+                confidence        FLOAT /* Changed to FLOAT */,
+                details           VARCHAR(500),
+                TIMES DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+            """)
             cursor.execute("SELECT COUNT(*) FROM TRANSACTIONS WHERE user_id = ?", (user_id,))
             total_rows = cursor.fetchone()[0]
         except Exception as e:
