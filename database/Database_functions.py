@@ -165,18 +165,17 @@ def get_all_transaction_details(user_id: str):
         # Ensure TRANSACTIONS table exists
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS TRANSACTIONS (
-                target            VARCHAR(255) ,
-                user_id           VARCHAR(255),
-                isFraud           INT,
-                user_mail         VARCHAR(255),
-                type              VARCHAR(255),
-                method            VARCHAR(20), 
-                target_type       VARCHAR(20), 
-                confidence        FLOAT /* Changed to FLOAT */,
-                details           VARCHAR(500),
-                TIMES DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-            """)
+            target            VARCHAR(255) ,
+            user_id           VARCHAR(255),
+            isFraud           INT,
+            user_mail         VARCHAR(255),
+            method            VARCHAR(20), 
+            target_type       VARCHAR(20), 
+            confidence        FLOAT /* Changed to FLOAT */,
+            details           VARCHAR(500),
+            TIMES DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
         cursor.execute("SELECT * FROM TRANSACTIONS WHERE user_id = ?", (user_id,))
     except Exception as e:
         print(f"An error occurred {e}")
@@ -199,18 +198,17 @@ def get_recent_transactions(user_id: str):
         # Ensure TRANSACTIONS table exists
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS TRANSACTIONS (
-                target            VARCHAR(255) ,
-                user_id           VARCHAR(255),
-                isFraud           INT,
-                user_mail         VARCHAR(255),
-                type              VARCHAR(255),
-                method            VARCHAR(20), 
-                target_type       VARCHAR(20), 
-                confidence        FLOAT /* Changed to FLOAT */,
-                details           VARCHAR(500),
-                TIMES DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-            """)
+            target            VARCHAR(255) ,
+            user_id           VARCHAR(255),
+            isFraud           INT,
+            user_mail         VARCHAR(255),
+            method            VARCHAR(20), 
+            target_type       VARCHAR(20), 
+            confidence        FLOAT /* Changed to FLOAT */,
+            details           VARCHAR(500),
+            TIMES DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
         # Limit the result to top 5 rows
         cursor.execute("SELECT * FROM TRANSACTIONS WHERE user_id = ? ORDER BY TIMES DESC LIMIT 5", (user_id,))
     except Exception as e:
@@ -270,7 +268,6 @@ def get_stats(user_id: str):
                 user_id           VARCHAR(255),
                 isFraud           INT,
                 user_mail         VARCHAR(255),
-                type              VARCHAR(255),
                 method            VARCHAR(20), 
                 target_type       VARCHAR(20), 
                 confidence        FLOAT /* Changed to FLOAT */,

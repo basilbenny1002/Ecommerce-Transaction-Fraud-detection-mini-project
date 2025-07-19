@@ -5,24 +5,31 @@ from slowapi.util import get_remote_address
 from slowapi.middleware import SlowAPIMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
+from app.routes.predict_routes import genenerate_transaction_id
 from database.Database_functions import  add_transaction_details, validate_api_key
 # from predictors.transaction_predict import format_predictions, predict_fraud
+from predictors.transaction_predict import predict_transaction
 from predictors.website_predict import format_data, predict_fraud_from_list
 import random
 import string
 from fastapi.responses import JSONResponse
 
 class Transaction(BaseModel):
-    type: str
-    amount: Union[float, int]
-    # nameOrig: str
-    oldbalanceOrg: Union[float, int]
-    newbalanceOrig: Union[float, int]
-    # nameDest: str
-    oldbalanceDest: Union[float, int]
-    newbalanceDest: Union[float, int]
-    isFlaggedFraud: Union[float, int]
-    mail: str
+    user_id: str
+    source: str
+    browser: str
+    sex: str
+    age: Union[int, float]
+    country_name: str
+    n_device_occur: Union[int, float]
+    signup_month: int
+    signup_day: int
+    signup_day_name: str
+    purchase_month: int
+    purchase_day: int
+    purchase_day_name: str
+    purchase_over_time: Union[int, float]
+    mail: Optional[str] = None  # mail can be null
 
 
 class Website(BaseModel):
@@ -70,29 +77,9 @@ async def predict(request: Request, body: PredictRequest, user_id: str = Depends
         if not getattr(v, "url", None):
             raise HTTPException(status_code=400, detail="Missing required field: url")
         # Call your website handler logic
-        val, confidence = format_data(
-            v.url,
-            v.credit_card_payment or None,
-            v.money_back_payment or None,
-            v.cash_on_delivery or None,
-            v.crypto or None,
-            v.free_contact_mails or None,
-            v.logo_url or None,
-)
-        # Record details
-        result = add_transaction_details(
-            v.url,
-            user_id,
-            "NULL", "NULL", "NULL", "NULL", "NULL",
-            val,
-            "NULL",
-            "NULL",
-            "NULL",
-            "Website",
-            confidence,
-            method="API"
-        )
-        return result
+        val, confidence = format_data(v.url,v.credit_card_payment, v.money_back_payment, v.cash_on_delivery, v.crypto, v.free_contact_mails,v.logo_url)
+        
+        return add_transaction_details(v.url, v.user_id, val, "Website", confidence, mail=v.mail, method="API", details="Null" )
 
     elif t == "transaction":
         # Ensure required fields
@@ -105,28 +92,28 @@ async def predict(request: Request, body: PredictRequest, user_id: str = Depends
         #     raise HTTPException(status_code=400, detail=f"Missing required fields: {', '.join(missing)}")
 
         # Predict fraud
-        data_list = [
-            v.amount, v.oldbalanceOrg, v.newbalanceOrig,
-            v.oldbalanceDest, v.newbalanceDest, v.isFlaggedFraud, v.type
-        ]
-
-        val, confidence = predict_fraud(format_predictions(data_list))
-
-        # Generate transaction_id
-        tx_id = generate_transaction_id()
-        result = add_transaction_details(
-        tx_id,
-        user_id,
-        v.amount, v.oldbalanceOrg, v.newbalanceOrig,
-        v.oldbalanceDest, v.newbalanceDest,
-        val,
-        v.isFlaggedFraud,
-        v.mail,
-        v.type,
-        "Transaction",
-        confidence,
-        method="API"
+        val, confidence = predict_transaction(
+            source=v.source,
+            browser=v.browser,
+            sex=v.sex,
+            age=v.age,
+            country_name=v.country_name,
+            n_device_occur=v.n_device_occur,
+            signup_month=v.signup_month,
+            signup_day=v.signup_day,
+            signup_day_name=v.signup_day_name,
+            purchase_month=v.purchase_month,
+            purchase_day=v.purchase_day,
+            purchase_day_name=v.purchase_day_name,
+            purchase_over_time=v.purchase_over_time
         )
+      
+        details = {"source": v.source, "browser": v.browser, "sex": v.sex, "age": v.age,
+               "country_name": v.country_name, "n_device_occur": v.n_device_occur,
+               "signup_month": v.signup_month, "signup_day": v.signup_day, "signup_day_name": v.signup_day_name,
+               "purchase_month": v.purchase_month, "purchase_day": v.purchase_day, "purchase_day_name": v.purchase_day_name,
+               "purchase_over_time": v.purchase_over_time}    
+        result = add_transaction_details(genenerate_transaction_id(), v.user_id, val, "Transaction", confidence, mail=v.mail, method="API", details=details)
         return result
 
     else:
