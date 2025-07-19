@@ -15,7 +15,6 @@ import string
 from fastapi.responses import JSONResponse
 
 class Transaction(BaseModel):
-    user_id: str
     source: str
     browser: str
     sex: str
@@ -40,6 +39,7 @@ class Website(BaseModel):
     crypto: Union[None, int]
     free_contact_mails: Union[None, int]
     logo_url: Union[None, int]
+    mail: Optional[str] = None  # mail can be null
     
 
 def generate_transaction_id():
@@ -79,7 +79,7 @@ async def predict(request: Request, body: PredictRequest, user_id: str = Depends
         # Call your website handler logic
         val, confidence = format_data(v.url,v.credit_card_payment, v.money_back_payment, v.cash_on_delivery, v.crypto, v.free_contact_mails,v.logo_url)
         
-        return add_transaction_details(v.url, v.user_id, val, "Website", confidence, mail=v.mail, method="API", details="Null" )
+        return add_transaction_details(v.url, user_id, val, "Website", confidence, mail=v.mail, method="API", details="Null" )
 
     elif t == "transaction":
         # Ensure required fields
@@ -113,7 +113,7 @@ async def predict(request: Request, body: PredictRequest, user_id: str = Depends
                "signup_month": v.signup_month, "signup_day": v.signup_day, "signup_day_name": v.signup_day_name,
                "purchase_month": v.purchase_month, "purchase_day": v.purchase_day, "purchase_day_name": v.purchase_day_name,
                "purchase_over_time": v.purchase_over_time}    
-        result = add_transaction_details(genenerate_transaction_id(), v.user_id, val, "Transaction", confidence, mail=v.mail, method="API", details=details)
+        result = add_transaction_details(genenerate_transaction_id(), user_id, val, "Transaction", confidence, mail=v.mail, method="API", details=details)
         return result
 
     else:
