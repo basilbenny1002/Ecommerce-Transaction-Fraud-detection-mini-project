@@ -88,3 +88,191 @@ def predict_fraud(data: list):
 #     # data = pandas.read_csv("onlinefraud.csv")
 #     # print(len(data['step'].tolist()))
 #     print(predict_fraud([181.00,          181.0,            0.00  ,       21182.0      ,       0.0    ,         0      ,   False  ,         True  ,     False,         False,          False]))
+
+
+
+# import pickle
+# import pandas as pd
+
+# # 🧠 1. Load the trained XGBoost model
+# with open('transaction_model.pkl', 'rb') as f:
+#     model = pickle.load(f)
+
+# # 🚀 2. Prediction function
+# def predict_transaction(
+#     source,
+#     browser,
+#     sex,
+#     age,
+#     country_name,
+#     n_device_occur,
+#     signup_month,
+#     signup_day,
+#     signup_day_name,
+#     purchase_month,
+#     purchase_day,
+#     purchase_day_name,
+#     purchase_over_time
+# ):
+#     """
+#     Takes raw feature values, preprocesses them, and returns:
+#       - predicted class (0 or 1)
+#       - confidence score (probability of predicted class)
+#     """
+#     # Convert to a single-row DataFrame
+#     df = pd.DataFrame([{
+#         'source': source,
+#         'browser': browser,
+#         'sex': sex,
+#         'age': age,
+#         'country_name': country_name,
+#         'n_device_occur': n_device_occur,
+#         'signup_month': signup_month,
+#         'signup_day': signup_day,
+#         'signup_day_name': signup_day_name,
+#         'purchase_month': purchase_month,
+#         'purchase_day': purchase_day,
+#         'purchase_day_name': purchase_day_name,
+#         'purchase_over_time': purchase_over_time
+#     }])
+
+#     # Ensure categorical columns match training encoding
+#     for col in ['source', 'browser', 'sex', 'country_name', 'signup_day_name', 'purchase_day_name']:
+#         df[col] = df[col].astype('category')
+
+#     # Predict class and probabilities
+#     pred_proba = model.predict_proba(df)[0]
+#     pred_class = int(model.predict(df)[0])
+#     confidence = float(pred_proba[pred_class])
+
+#     return pred_class, confidence
+
+# # 🧪 3. CLI support
+# if __name__ == '__main__':
+#     # Example raw input—feel free to change values to test
+#     raw_input = {
+#         'source': 'Ads',
+#         'browser': 'Chrome',
+#         'sex': 'F',
+#         'age': 29,
+#         'country_name': 'United States',
+#         'n_device_occur': 2,
+#         'signup_month': 7,
+#         'signup_day': 15,
+#         'signup_day_name': 'Tuesday',
+#         'purchase_month': 7,
+#         'purchase_day': 16,
+#         'purchase_day_name': 'Wednesday',
+#         'purchase_over_time': 1500.0,
+#     }
+
+#     pred, conf = predict_transaction(**raw_input)
+#     label = 'FRAUD' if pred == 1 else 'NOT FRAUD'
+#     print(f" Prediction: {label} (Confidence: {conf:.2%})")
+
+
+import pickle
+import pandas as pd
+import numpy as np
+
+# 1. Load the trained model + scaler
+with open('models/transaction_model.pkl', 'rb') as f:
+    model = pickle.load(f)
+with open('models/scaler.pkl', 'rb') as f:
+    scaler = pickle.load(f)
+
+# 2. Columns definition (must match your train.py)
+cat_cols = [
+    'source', 'browser', 'sex',
+    'country_name', 'signup_day_name', 'purchase_day_name'
+]
+num_cols = [
+    'n_device_occur', 'signup_month', 'signup_day',
+    'purchase_month', 'purchase_day',
+    'purchase_over_time', 'age'
+]
+
+def _preprocess(df: pd.DataFrame) -> pd.DataFrame:
+    # a) handle infinities exactly as in train.py
+    for col in num_cols:
+        vals = df[col]
+        finite = vals[np.isfinite(vals)]
+        if not finite.empty:
+            finite_min, finite_max = finite.min(), finite.max()
+            df[col] = vals.replace(np.inf,  finite_max)\
+                          .replace(-np.inf, finite_min)
+        else:
+            df[col] = vals.replace([np.inf, -np.inf], 0)
+
+    # b) scale numeric features
+    df[num_cols] = scaler.transform(df[num_cols])
+
+    # c) enforce categorical dtype
+    for col in cat_cols:
+        df[col] = df[col].astype('category')
+
+    return df
+
+def predict_transaction(
+    source: str,
+    browser: str,
+    sex: str,
+    age: float,
+    country_name: str,
+    n_device_occur: float,
+    signup_month: float,
+    signup_day: float,
+    signup_day_name: str,
+    purchase_month: float,
+    purchase_day: float,
+    purchase_day_name: str,
+    purchase_over_time: float
+) -> tuple[int, float]:
+    """
+    Returns (predicted_class, confidence_score)
+    """
+    # build single-row DataFrame
+    row = {
+        'source': source,
+        'browser': browser,
+        'sex': sex,
+        'age': age,
+        'country_name': country_name,
+        'n_device_occur': n_device_occur,
+        'signup_month': signup_month,
+        'signup_day': signup_day,
+        'signup_day_name': signup_day_name,
+        'purchase_month': purchase_month,
+        'purchase_day': purchase_day,
+        'purchase_day_name': purchase_day_name,
+        'purchase_over_time': purchase_over_time
+    }
+    df = pd.DataFrame([row])
+
+    # preprocess & predict
+    df = _preprocess(df)
+    proba = model.predict_proba(df)[0]
+    cls   = int(model.predict(df)[0])
+    return cls, float(proba[cls])
+
+# 3. CLI example
+if __name__ == '__main__':
+    sample = {
+        'source': 'Ads',
+        'browser': 'Chrome',
+        'sex': 'F',
+        'age': 29,
+        'country_name': 'United States',
+        'n_device_occur': 2,
+        'signup_month': 7,
+        'signup_day': 15,
+        'signup_day_name': 'Tuesday',
+        'purchase_month': 7,
+        'purchase_day': 16,
+        'purchase_day_name': 'Wednesday',
+        'purchase_over_time': 1500.0,
+    }
+
+    pred, conf = predict_transaction(**sample)
+    label = 'FRAUD' if pred == 1 else 'NOT FRAUD'
+    print(f" Prediction: {label} (Confidence: {conf:.2%})")
