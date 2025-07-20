@@ -1,15 +1,16 @@
-import sqlite3
+# import sqlite3
 from fastapi.responses import JSONResponse
 import random
 import string
 import smtplib
 from email.mime.text import MIMEText
 import os
+import sqlitecloud
 import json
 from fastapi import Header, HTTPException
 from dotenv import load_dotenv
 load_dotenv()
-
+database = str(os.getenv("SQLURL")) + str(os.getenv("SQLKEY"))
 
 def generate_api_key(length):
     characters = string.ascii_letters + string.digits
@@ -21,7 +22,7 @@ def get_new_api_key(user_id: str):
     conn = None
     key = generate_api_key(16)
     try:
-        conn = sqlite3.connect('users.db') 
+        conn = sqlitecloud.connect(database) 
         cursor = conn.cursor()
         cursor.execute("UPDATE USERS SET API_KEY = ? WHERE user_id = ?", (key, user_id))
         conn.commit()
@@ -38,7 +39,7 @@ def add_new_user(mail: str, password: str, user_id: str, name: str):
     conn = None
     try:
         API_KEY = generate_api_key(16)
-        conn = sqlite3.connect('users.db') 
+        conn = sqlitecloud.connect(database) 
         cursor = conn.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS USERS (user_id VARCHAR(255) primary key, name varchar(25), mail VARCHAR(255), password VARCHAR(255), API_KEY VARCHAR(255))") 
         
@@ -49,7 +50,7 @@ def add_new_user(mail: str, password: str, user_id: str, name: str):
 
         cursor.execute("INSERT INTO USERS VALUES (?, ?, ?, ?, ?)", (user_id, name, mail, password, API_KEY))
         conn.commit()
-    except sqlite3.IntegrityError:
+    except sqlitecloud.IntegrityError:
         print("Error: User with this user_id already exists.")
         return JSONResponse(status_code=400, content={"Status_code": 400, "Message": "User with this user_id already exists."})
     except Exception as e:
@@ -67,7 +68,7 @@ def get_user_data(provided_password: str, mail: str ):
     if not mail:
         return JSONResponse(status_code=400, content={"Status_code": 400, "Message": "No user_id or mail provided"})
     try:
-        conn = sqlite3.connect('users.db') 
+        conn = sqlitecloud.connect(database) 
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM USERS WHERE mail = ?", (mail,)) 
         data = cursor.fetchall()
@@ -91,7 +92,7 @@ def add_transaction_details(target, user_id, isFraud, target_type, confidence, d
     conn = None
 
     try:
-        conn = sqlite3.connect('users.db') 
+        conn = sqlitecloud.connect(database) 
         cursor = conn.cursor()
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS TRANSACTIONS (
@@ -144,7 +145,7 @@ def get_transaction_details(user_id: str):
     # For now, just ensuring connection is managed if it were to be used.
     conn = None
     try:
-        conn = sqlite3.connect('users.db') 
+        conn = sqlitecloud.connect(database) 
         cursor = conn.cursor()
         # TODO: Implement actual logic to fetch and return transaction details
         # Example: cursor.execute("SELECT * FROM TRANSACTIONS WHERE user_id = ?", (user_id,))
@@ -160,7 +161,7 @@ def get_transaction_details(user_id: str):
 def get_all_transaction_details(user_id: str):
     conn = None
     try:
-        conn = sqlite3.connect('users.db') 
+        conn = sqlitecloud.connect(database) 
         cursor = conn.cursor()
         # Ensure TRANSACTIONS table exists
         cursor.execute("""
@@ -193,7 +194,7 @@ def get_all_transaction_details(user_id: str):
 def get_recent_transactions(user_id: str):
     conn = None
     try:
-        conn = sqlite3.connect('users.db') 
+        conn = sqlitecloud.connect(database) 
         cursor = conn.cursor()
         # Ensure TRANSACTIONS table exists
         cursor.execute("""
@@ -270,7 +271,7 @@ def send_mail(mail_id,target_type, target):
 def get_stats(user_id: str):
     conn = None
     try:
-        conn = sqlite3.connect('users.db') 
+        conn = sqlitecloud.connect(database) 
         cursor = conn.cursor()
         # Ensure TRANSACTIONS table exists
         try:
@@ -311,7 +312,7 @@ def get_stats(user_id: str):
 def clear_history(user_id: str):
     conn = None
     try:
-        conn = sqlite3.connect('users.db')
+        conn = sqlitecloud.connect(database)
         cursor = conn.cursor()
 
         # # Optional: Ensure the table exists
@@ -366,7 +367,7 @@ def validate_api_key(authorization: str = Header(...)):
 def getet_user_id_from_api_key(key: str):
     conn = None
     try:
-        conn = sqlite3.connect('users.db')
+        conn = sqlitecloud.connect(database)
         cursor = conn.cursor()
         cursor.execute("SELECT user_id FROM USERS WHERE API_KEY = ?", (key,))
         result = cursor.fetchone()
