@@ -10,7 +10,7 @@ import json
 from fastapi import Header, HTTPException
 from dotenv import load_dotenv
 load_dotenv()
-database = str(os.getenv("SQLURL")) + "apikey=" + str(os.getenv("SQLKEY"))
+database = str(os.getenv("SQLURL")) + "?apikey=" + str(os.getenv("SQLKEY"))
 
 def generate_api_key(length):
     characters = string.ascii_letters + string.digits
