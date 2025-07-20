@@ -304,7 +304,7 @@ def get_stats(user_id: str):
             api_rows = 0
         return JSONResponse(status_code=200, content={"Status_code": 200, "total_checks": total_rows,"api_calls": api_rows, "frauds_detected": fraud_rows})
     except Exception as e:
-        print(f"An error occurred {e}")
+        print(f"An error occurred {e}", flush=True)
         return JSONResponse(status_code=404, content={"Status_code": 404, "Message": f"Failed: {e}"})
     finally:
         if conn:
