@@ -239,8 +239,8 @@ def get_recent_transactions(user_id: str):
             conn.close()
 
 def send_mail(mail_id,target_type, target):
-    print("Mail send successfully", flush=True)
-    return #TODO uncomment to actually send the mail :DDDD
+    # print("Mail send successfully", flush=True)
+    # return #TODO uncomment to actually send the mail :DDDD
     
     if target_type == "Website":
         message = f"Hey, your recent transaction on {target} have been detected as a scam, please do the necessary steps"
