@@ -17,12 +17,12 @@ def format_data(url: str, credit_card_payment: int = None , money_back_option: i
         for key, value in features.items():
             data.append(int(value))
     else:
-        data.append(credit_card_payment)
-        data.append(money_back_option)
-        data.append(cash_on_delivery)
-        data.append(crypto_payment)
-        data.append(free_contact_mails)
-        data.append(logo_url)
+        data.append(credit_card_payment or 0)
+        data.append(money_back_option or 0)
+        data.append(cash_on_delivery or 0)
+        data.append(crypto_payment or 0)
+        data.append(free_contact_mails or 0)
+        data.append(logo_url or 0)
 
     data.extend(get_ssl_details(shortened_url))
     data.extend(get_domain_registration_details(shortened_url))
